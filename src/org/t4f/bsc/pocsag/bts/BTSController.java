@@ -26,6 +26,10 @@ public class BTSController {
 		
 		if (serialPort == null ) {
 			serialPort = openConnection(Config.btsPort, Config.btsBauds);
+			if (serialPort == null) {
+				return true;
+			}
+				
 		}
 		
 		try {
@@ -61,7 +65,7 @@ public class BTSController {
 			
 			
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOGGER.severe("Error sending data to BTS: " + e);
 		} finally {
 			closeConnection();

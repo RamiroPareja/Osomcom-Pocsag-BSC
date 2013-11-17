@@ -1,5 +1,6 @@
 package org.t4f.bsc.thread;
 
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.t4f.bsc.pocsag.PocsagMessage;
@@ -19,6 +20,8 @@ public class PocsagProcess extends Thread {
 	@Override
 	public void run() {
 		
+		HashMap <PocsagMessage, Integer> numTimesProccesed = new HashMap<PocsagMessage, Integer>();
+		
 		while (running) {
 			//try {
 				PocsagMessage pocsagMessage = PocsagQueue.pollMessageQueue();
@@ -30,8 +33,27 @@ public class PocsagProcess extends Thread {
 					// frecuencias operan nuestros subscribers y generar idles para todas ellas. 
 				} else { 
 					if (processPocsagMessage(pocsagMessage)) {
-						// The message couldnt be proccesed. Send it back to queue to try again
-						PocsagQueue.enqueuePocsagMessage(pocsagMessage);
+						// The message couldnt be proccesed. 
+						
+						int numRetries = (numTimesProccesed.get(pocsagMessage)==null)?0:numTimesProccesed.get(pocsagMessage);
+						if (numRetries<5) {
+							// Send it back to queue to try again after waiting 10 seconds
+							numTimesProccesed.put(pocsagMessage, ++numRetries);
+							try {
+								Thread.sleep(10000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							LOGGER.fine("Retrying (" + numRetries + ") message: " + pocsagMessage);
+							
+							PocsagQueue.enqueuePocsagMessage(pocsagMessage);
+
+						} else {
+							numTimesProccesed.remove(pocsagMessage);
+							LOGGER.fine("Dismissing message after " + numRetries + " tries: " + pocsagMessage);
+						}
+						
 					}
 						
 				}

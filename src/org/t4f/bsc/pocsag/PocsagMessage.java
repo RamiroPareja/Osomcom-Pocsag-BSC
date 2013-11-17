@@ -46,7 +46,7 @@ public class PocsagMessage {
 	public static PocsagMessage parseMqttString(String mqttString) {
 		PocsagMessage pm = new PocsagMessage();
 		
-		Pattern p = Pattern.compile("ascii: PM:\\{(\\d+),(\\d+),(\\d+),(\\w+),(\\w+)\\} - (\\d+)");
+		Pattern p = Pattern.compile("ascii: PM:\\{(\\d+),(\\d+),(\\d+),(\\w+),([\\w\\s\\n]+)\\}-(\\d+)");
 		Matcher m = p.matcher(mqttString);
 		
 		
